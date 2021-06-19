@@ -44,4 +44,4 @@ while Running:
                 Running = False
     pygame.display.update()
 
-click = input("Press")
+# click = input("Press")
