@@ -1,47 +1,57 @@
-import pygame
-import sys
-import os
+from numpy import inf as infinity
 
-os.environ["SDL_VIDEO_CENTERED"] = "1"
+my_val = {
+    'B': {'A': 5, 'D': 1, 'G': 2},
+    'A': {'B': 5, 'D': 3, 'E': 12, 'F': 5},
+    'D': {'B': 1, 'G': 1, 'E': 1, 'A': 3},
+    'G': {'B': 2, 'D': 1, 'C': 2},
+    'C': {'G': 2, 'E': 1, 'F': 16},
+    'E': {'A': 12, 'D': 1, 'C': 1, 'F': 2},
+    'F': {'A': 5, 'E': 2, 'C': 16}}
 
-pygame.init()
 
-X_cords = []
-Y_cords = []
-counter = 0
-White = (225, 225, 225)
-line_width = 1
-node_radius = 5
-screen_width = 800
-screen_height = 800
-screen_size = [screen_width, screen_height]
-screen = pygame.display.set_mode(screen_size)
+def dijkstra_algo(graph, start_node, goal_node):
+    shortest = {}
+    track_pre = {}
+    unvisited_node = graph
+    path = []
 
-pygame.display.set_caption("Visualizer")
+    for node in unvisited_node:
+        shortest[node] = infinity
+    shortest[start_node] = 0
 
-Running = True
-while Running:
-    x, y = pygame.mouse.get_pos()
+    while unvisited_node:
+        minDistance = None
 
-    for events in pygame.event.get():
-        if events.type == pygame.QUIT:
-            pygame.quit()
-            sys.exit()
-        elif events.type == pygame.MOUSEBUTTONDOWN:
-            X_cords.append(x)
-            Y_cords.append(y)
-            pygame.draw.circle(screen, White, (x, y), node_radius)
-            if len(X_cords) > 1 and len(Y_cords) > 1:
-                start = (X_cords[counter], Y_cords[counter])
-                end = (X_cords[counter+1], Y_cords[counter+1])
-                pygame.draw.line(screen, White, start, end, line_width)
-                counter += 1
-            if len(X_cords) == 5 and len(Y_cords) == 5:
-                start = (X_cords[counter], Y_cords[counter])
-                end = (X_cords[0], Y_cords[0])
-                pygame.draw.line(screen, White, start, end, line_width)
-                pygame.display.update()
-                Running = False
-    pygame.display.update()
+        for node in unvisited_node:
+            if minDistance is None:
+                minDistance = node
+            elif shortest[node] < shortest[minDistance]:
+                minDistance = node
 
-click = input("Press")
+        pathway = graph[minDistance].items()
+
+        for child_node_distance, weight in pathway:
+            if weight + shortest[minDistance] < shortest[child_node_distance]:
+                shortest[child_node_distance] = weight + shortest[minDistance]
+                track_pre[child_node_distance] = minDistance
+
+        unvisited_node.pop(minDistance)
+
+    current_node = goal_node
+
+    while current_node != start_node:
+        try:
+            path.insert(0, current_node)
+            current_node = track_pre[current_node]
+        except KeyError:
+            print("Can't reach")
+            break
+
+    path.insert(0, start_node)
+
+    if shortest[goal_node] != infinity:
+        print("Cost: " + str(shortest[goal_node]) + "\nPath: " + str(path))
+
+
+dijkstra_algo(my_val, 'B', 'C')
